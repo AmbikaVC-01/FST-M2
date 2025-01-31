@@ -1,0 +1,37 @@
+services:
+    postgres:
+        image: docker.io/postgres
+        environment:
+            - POSTGRES_PASSWORD=postgresPassword
+    redis:
+        image: docker.io/redis
+        command: ["redis-server", "--protected-mode", "no"]
+    api:
+        build: ./server
+        image: docker.io/ambika296/complex_api
+        environment:
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379
+            - PGUSER=postgres
+            - PGHOST=postgres
+            - PGDATABASE=postgres
+            - PGPASSWORD=postgresPassword
+            - PGPORT=5432
+    worker:
+        build: ./worker
+        image: docker.io/ambika296/complex_worker
+        environment:
+            - REDIS_HOST=redis
+            - REDIS_PORT=6379   
+    client:
+              build: ./client
+              image: docker.io/ambika296/complex_client
+    nginx:
+              depends_on:
+                  - api
+                  - client 
+              build: ./nginx
+              ports:
+                    - '8082:80'
+
+            
